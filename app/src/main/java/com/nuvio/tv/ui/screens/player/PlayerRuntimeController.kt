@@ -734,7 +734,10 @@ class PlayerRuntimeController(
         }
     }
 
+    private val phoneRemoteBridge = PlayerRemoteBridge(this)
+
     fun onCleared() {
+        phoneRemoteBridge.close()
         releasePlayer()
         stopTorrentStream()
         torrentService.shutdown()

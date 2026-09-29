@@ -2,6 +2,8 @@
 
 package com.nuvio.tv.ui.screens.settings
 
+import androidx.compose.material.icons.filled.PhoneAndroid
+
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.activity.compose.BackHandler
@@ -99,6 +101,7 @@ import kotlinx.coroutines.flow.map
 import kotlin.math.roundToInt
 
 internal enum class SettingsCategory {
+    CONNECT_PHONE,
     EXPERIENCE,
     ACCOUNT,
     PROFILES,
@@ -165,6 +168,13 @@ private sealed interface ExperienceModeLoadState {
 
 @Composable
 private fun rememberSettingsSectionSpecs() = listOf(
+    SettingsSectionSpec(
+        category = SettingsCategory.CONNECT_PHONE,
+        title = "Connect phone",
+        icon = Icons.Default.PhoneAndroid,
+        subtitle = "Control TV playback from Nuvio Mobile",
+        destination = SettingsSectionDestination.Inline
+    ),
     SettingsSectionSpec(
         category = SettingsCategory.EXPERIENCE,
         title = stringResource(R.string.settings_experience),
@@ -288,6 +298,7 @@ fun SettingsScreen(
     val visibleSections = remember(isPrimaryProfileActive, isEssentialMode, allSectionSpecs) {
         allSectionSpecs.filter { section ->
             when (section.category) {
+                SettingsCategory.CONNECT_PHONE -> BuildConfig.FLAVOR == "full"
                 SettingsCategory.EXPERIENCE -> false
                 SettingsCategory.DEBUG -> BuildConfig.IS_DEBUG_BUILD && !isEssentialMode
                 SettingsCategory.PROFILES -> isPrimaryProfileActive
@@ -313,6 +324,7 @@ fun SettingsScreen(
     }
     val contentFocusRequesters = remember {
         mapOf(
+            SettingsCategory.CONNECT_PHONE to FocusRequester(),
             SettingsCategory.APPEARANCE to FocusRequester(),
             SettingsCategory.EXPERIENCE to FocusRequester(),
             SettingsCategory.PROFILES to FocusRequester(),
@@ -927,6 +939,9 @@ private fun SettingsDetailPane(
     onNavigateToLicensesAttributions: () -> Unit
 ) {
     when (selectedCategory) {
+        SettingsCategory.CONNECT_PHONE -> ConnectPhoneSettings(
+            initialFocusRequester = if (allowDetailAutofocus) contentFocusRequesters[SettingsCategory.CONNECT_PHONE] else null
+        )
         SettingsCategory.EXPERIENCE -> EssentialAdvancedSettingsContent(
             experienceModeViewModel = experienceModeViewModel,
             initialFocusRequester = if (allowDetailAutofocus) {
